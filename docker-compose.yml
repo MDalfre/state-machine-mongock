@@ -1,0 +1,21 @@
+version: '3'
+services:
+  mongodb:
+    image: mongo:latest
+    ports:
+      - 27017:27017
+    enviroment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+
+  mongo-admin:
+    image: mongo-express:latest
+    ports:
+      - 9090:8081
+    depends_on:
+      - mongodb
+    restart: on-failure
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: root

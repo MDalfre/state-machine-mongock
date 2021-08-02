@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: "statemachine-mongock"
+  data:
+    mongodb:
+      authentication-database: "admin"
+      database: "test"
+      host: "localhost"
+      password: "root"
+      port: "27017"
+      username: "root"

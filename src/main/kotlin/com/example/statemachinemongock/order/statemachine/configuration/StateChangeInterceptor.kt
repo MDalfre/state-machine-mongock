@@ -1,9 +1,12 @@
 package com.example.statemachinemongock.order.statemachine.configuration
 
-import com.example.statemachinemongock.order.OrderRepository
 import com.example.statemachinemongock.order.OrderNotFoundException
+import com.example.statemachinemongock.order.OrderRepository
+import com.example.statemachinemongock.order.OrderService.Companion.ORDER_NR_HEADER
+import com.example.statemachinemongock.order.OrderService.Companion.STATE_ERROR
 import com.example.statemachinemongock.order.statemachine.OrderEvent
 import com.example.statemachinemongock.order.statemachine.OrderState
+import com.mongodb.MongoException
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.messaging.Message
@@ -12,7 +15,6 @@ import org.springframework.statemachine.state.State
 import org.springframework.statemachine.support.StateMachineInterceptorAdapter
 import org.springframework.statemachine.transition.Transition
 import org.springframework.stereotype.Component
-import java.lang.Exception
 
 @Component
 class StateChangeInterceptor(
@@ -27,20 +29,27 @@ class StateChangeInterceptor(
         transition: Transition<OrderState, OrderEvent>,
         stateMachine: StateMachine<OrderState, OrderEvent>
     ) {
-        val orderId = message?.let {
-            it.headers["ORDER_ID"].toString()
-        } ?: throw IllegalArgumentException("Required orderId header not found")
+        try {
+            val orderId = message?.let {
+                it.headers[ORDER_NR_HEADER]?.toString()
+            } ?: throw OrderNotFoundException("Required orderId header not found")
 
-        logger.info(
-            """
-                [StateMachine] preStateChange
-                [OrderId] $orderId
-                changing state from: ${transition.source.id} to: ${transition.target.id}
-            """.trimIndent()
-        )
+            logger.info(
+                """[StateMachine] preStateChange
+                   [OrderId] $orderId
+                   changing state from: ${transition.source.id} to: ${transition.target.id}
+                """.trimIndent()
+            )
 
-        val order = orderRepository.findByIdOrNull(orderId) ?: throw OrderNotFoundException(orderId)
-        orderRepository.save(order.copy(state = state.id))
+            val order = orderRepository.findByIdOrNull(orderId) ?: throw OrderNotFoundException(orderId)
+            orderRepository.save(order.copy(state = state.id))
+        } catch (ex: OrderNotFoundException) {
+            stateMachine.setStateMachineError(ex)
+            throw ex
+        } catch (ex: MongoException) {
+            stateMachine.setStateMachineError(ex)
+            throw ex
+        }
     }
 
     override fun postStateChange(
@@ -53,10 +62,10 @@ class StateChangeInterceptor(
     }
 
     override fun stateMachineError(
-        stateMachine: StateMachine<OrderState, OrderEvent>?,
+        stateMachine: StateMachine<OrderState, OrderEvent>,
         exception: Exception
     ): Exception {
-        logger.error("error found ${exception.message}")
+        stateMachine.extendedState.variables[STATE_ERROR] = exception
         return exception
     }
 }

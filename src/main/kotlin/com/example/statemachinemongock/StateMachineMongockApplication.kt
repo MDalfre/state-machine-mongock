@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class StateMachineMongockApplication
 
 fun main(args: Array<String>) {
-	runApplication<StateMachineMongockApplication>(*args)
+    runApplication<StateMachineMongockApplication>(*args)
 }

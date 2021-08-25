@@ -1,10 +1,12 @@
 package com.example.statemachinemongock.order.statemachine
 
 enum class OrderState {
-    PROCESSED,
+    CREATED,
     PAYMENT_PENDING,
     PAYMENT_APPROVED,
     PAYMENT_FAILED,
-    DELIVERY_STARTED,
+    DELIVERY,
+    DELIVERY_FAILED,
+    CANCELLED,
     FINISHED
 }

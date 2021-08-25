@@ -9,8 +9,9 @@ import java.util.*
 @Document
 data class Order(
     @Id
-    val id: String,
     val orderNr: String = UUID.randomUUID().toString(),
-    val state: OrderState = OrderState.PROCESSED,
+    val product: List<String>,
+    val address: String,
+    val state: OrderState = OrderState.CREATED,
     val createdAt: LocalDateTime = LocalDateTime.now()
 )

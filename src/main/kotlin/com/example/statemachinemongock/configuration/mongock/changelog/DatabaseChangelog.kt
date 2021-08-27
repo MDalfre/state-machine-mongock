@@ -1,18 +1,39 @@
 package com.example.statemachinemongock.configuration.mongock.changelog
 
+import com.example.statemachinemongock.configuration.mongock.changelog.seeder.Seeder
+import com.example.statemachinemongock.model.Address
+import com.example.statemachinemongock.model.Customer
 import com.github.cloudyrock.mongock.ChangeLog
 import com.github.cloudyrock.mongock.ChangeSet
 import com.github.cloudyrock.mongock.driver.mongodb.springdata.v3.decorator.impl.MongockTemplate
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 
 @ChangeLog
 class DatabaseChangelog {
 
     private val logger: Logger = LoggerFactory.getLogger(javaClass)
 
-    @ChangeSet(order = "001", id = "test", author = "Marcio Henrique Dalfre")
+    @ChangeSet(order = "001", id = "[Local] Client Seeds", author = "Marcio Henrique Dalfre")
     fun changelog1(mongockTemplate: MongockTemplate) {
-        logger.info("Just testing changelog")
+        val customerList = Seeder().generateCustomer(1000)
+        mongockTemplate.insertAll(customerList)
+        logger.info("Inserted ${customerList.size} customers to db.")
+    }
+
+    @ChangeSet(order = "002", id = "[Local] Client alterations", author = "Marcio Henrique Dalfre")
+    fun changelog2(mongockTemplate: MongockTemplate) {
+        val customerName = "123"
+        val query = Query.query(
+            Criteria.where("name").`is`(customerName)
+        )
+        mongockTemplate.findOne(query, Customer::class.java)?.let { customer ->
+            val newAddress = Address(street = "Jose da Cunha, 249", zipCode = "13488-135")
+            val customerUpdate = customer.copy(address = listOf(newAddress))
+
+            mongockTemplate.save(customerUpdate)
+        }?: run { logger.error("Customer not found !") }
     }
 }

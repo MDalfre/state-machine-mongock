@@ -3,9 +3,9 @@ package com.example.statemachinemongock.order.statemachine.configuration
 import com.example.statemachinemongock.order.OrderNotFoundException
 import com.example.statemachinemongock.order.OrderRepository
 import com.example.statemachinemongock.order.OrderService.Companion.ORDER_NR_HEADER
-import com.example.statemachinemongock.order.OrderService.Companion.STATE_ERROR
 import com.example.statemachinemongock.order.statemachine.OrderEvent
 import com.example.statemachinemongock.order.statemachine.OrderState
+import com.example.statemachinemongock.order.statemachine.setError
 import com.mongodb.MongoException
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -65,7 +65,7 @@ class StateChangeInterceptor(
         stateMachine: StateMachine<OrderState, OrderEvent>,
         exception: Exception
     ): Exception {
-        stateMachine.extendedState.variables[STATE_ERROR] = exception
+        stateMachine.setError(exception)
         return exception
     }
 }

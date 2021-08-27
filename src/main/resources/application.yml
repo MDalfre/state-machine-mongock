@@ -9,3 +9,14 @@ spring:
       password: "root"
       port: "27017"
       username: "root"
+
+cloud:
+  aws:
+    credentials:
+      accessKey: 'docker'
+      secretKey: 'docker'
+    endpoint: "http://localhost:4566"
+    region:
+      static: "us-east-1"
+    stack:
+      auto: false

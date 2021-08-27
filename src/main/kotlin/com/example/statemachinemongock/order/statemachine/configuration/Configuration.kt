@@ -1,7 +1,10 @@
 package com.example.statemachinemongock.order.statemachine.configuration
 
+import com.example.statemachinemongock.order.OrderService.Companion.ORDER_NR_HEADER
 import com.example.statemachinemongock.order.statemachine.OrderEvent
 import com.example.statemachinemongock.order.statemachine.OrderState
+import com.example.statemachinemongock.order.statemachine.messageHeader
+import com.example.statemachinemongock.payment.PaymentService
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Configuration
 import org.springframework.messaging.Message
@@ -17,7 +20,7 @@ import org.springframework.statemachine.state.State
 @EnableStateMachineFactory
 @Configuration
 class Configuration(
-
+    private val paymentService: PaymentService
 ) : StateMachineConfigurerAdapter<OrderState, OrderEvent>() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -35,6 +38,8 @@ class Configuration(
         transitions.withExternal()
             .source(OrderState.CREATED).target(OrderState.PAYMENT_PENDING)
             .event(OrderEvent.CREATE_ORDER)
+            .action { paymentService.producePaymentEvent(it.messageHeader(ORDER_NR_HEADER)) }
+            .guard { paymentService.paymentFeatureToggle() }
 
             .and().withExternal()
             .source(OrderState.PAYMENT_PENDING).target(OrderState.PAYMENT_APPROVED)
@@ -53,16 +58,16 @@ class Configuration(
             .event(OrderEvent.START_DELIVERY)
 
             .and().withExternal()
-            .source(OrderState.DELIVERY).target(OrderState.FINISHED)
-            .event(OrderEvent.COMPLETE_ORDER)
-
-            .and().withExternal()
             .source(OrderState.DELIVERY).target(OrderState.DELIVERY_FAILED)
             .event(OrderEvent.NOTIFY_DELIVERY_ERROR)
 
             .and().withExternal()
             .source(OrderState.DELIVERY_FAILED).target(OrderState.DELIVERY)
             .event(OrderEvent.RETRY_DELIVERY)
+
+            .and().withExternal()
+            .source(OrderState.DELIVERY).target(OrderState.FINISHED)
+            .event(OrderEvent.COMPLETE_ORDER)
     }
 
     override fun configure(config: StateMachineConfigurationConfigurer<OrderState, OrderEvent>) {

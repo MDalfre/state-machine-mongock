@@ -1,9 +1,11 @@
 package com.example.statemachinemongock.configuration.mongock
 
+import com.example.statemachinemongock.order.OrderService
 import com.github.cloudyrock.mongock.driver.mongodb.springdata.v3.SpringDataMongoV3Driver
 import com.github.cloudyrock.spring.v5.MongockSpring5
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.cloud.aws.messaging.core.QueueMessagingTemplate
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -21,7 +23,9 @@ class MongockConfig {
     @Bean
     fun mongockBuilder(
         mongoTemplate: MongoTemplate,
-        applicationContext: ApplicationContext
+        applicationContext: ApplicationContext,
+        queueMessagingTemplate: QueueMessagingTemplate,
+        orderService: OrderService
     ): MongockSpring5.MongockApplicationRunner {
 
         logger.info("Starting Mongock ...")
@@ -36,6 +40,7 @@ class MongockConfig {
             .setDriver(driver)
             .addChangeLogsScanPackage(changelogPackage)
             .setSpringContext(applicationContext)
+            .addDependency(orderService)
             .buildApplicationRunner()
     }
 }

@@ -3,6 +3,8 @@ package com.example.statemachinemongock.configuration.mongock.changelog
 import com.example.statemachinemongock.configuration.mongock.changelog.seeder.Seeder
 import com.example.statemachinemongock.model.Address
 import com.example.statemachinemongock.model.Customer
+import com.example.statemachinemongock.order.OrderRequest
+import com.example.statemachinemongock.order.OrderService
 import com.github.cloudyrock.mongock.ChangeLog
 import com.github.cloudyrock.mongock.ChangeSet
 import com.github.cloudyrock.mongock.driver.mongodb.springdata.v3.decorator.impl.MongockTemplate
@@ -34,6 +36,26 @@ class DatabaseChangelog {
             val customerUpdate = customer.copy(address = listOf(newAddress))
 
             mongockTemplate.save(customerUpdate)
-        }?: run { logger.error("Customer not found !") }
+        } ?: run { logger.error("Customer not found !") }
+    }
+
+    @ChangeSet(order = "003", id = "[Local] Generate orders", author = "Marcio Henrique Dalfre")
+    fun changelog3(mongockTemplate: MongockTemplate, orderService: OrderService) {
+        val productList = listOf("Ventilador", "Chinelo")
+
+        mongockTemplate.findAll(Customer::class.java).let { customerList ->
+            customerList.forEach { customer ->
+                val order = OrderRequest(
+                    product = productList,
+                    address = customer.address.last().street
+                )
+                orderService.createOrder(order)
+            }
+        }
+    }
+
+    @ChangeSet(order = "004", id = "[Local] ", author = "Marcio Henrique Dalfre")
+    fun changelog4() {
+
     }
 }

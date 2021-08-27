@@ -3,6 +3,7 @@ package com.example.statemachinemongock.payment
 import com.example.statemachinemongock.order.OrderService
 import com.example.statemachinemongock.order.statemachine.OrderEvent
 import org.slf4j.LoggerFactory
+import org.springframework.cloud.aws.messaging.listener.SqsMessageDeletionPolicy.ON_SUCCESS
 import org.springframework.cloud.aws.messaging.listener.annotation.SqsListener
 import org.springframework.stereotype.Component
 
@@ -11,7 +12,7 @@ class OrderPaymentConsumer(private val orderService: OrderService) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @SqsListener("order-payment-queue")
+    @SqsListener("order-payment-queue", deletionPolicy = ON_SUCCESS)
     fun consume(event: PaymentEvent) {
         Thread.sleep(1000)
         logger.info("Received payment event for order: ${event.orderNr}")

@@ -102,7 +102,7 @@ class OrderController(
     @GetMapping("/test")
     fun getQ(): PaymentEvent? {
         return queueMessagingTemplate.receiveAndConvert(
-            "order-payment-queue",
+            "order-payment-dlq",
             PaymentEvent::class.java
         )
     }

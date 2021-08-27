@@ -42,7 +42,7 @@ class Seeder {
     private fun addressGenerator(): List<Address> {
         return listOf(
             Address(
-                street = "${nameGenerator()}, ${numberGenerator(nextInt(2, 4))}",
+                street = "Rua ${nameGenerator()}, ${numberGenerator(nextInt(2, 4))}",
                 zipCode = "${numberGenerator(5)}-${numberGenerator(3)}"
             )
         )

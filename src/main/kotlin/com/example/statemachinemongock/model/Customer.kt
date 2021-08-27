@@ -13,11 +13,11 @@ data class Customer(
     val phone: List<Phone>
 )
 
-data class Address (
+data class Address(
     val street: String,
     val zipCode: String
-        )
+)
 
-data class Phone (
+data class Phone(
     val number: Long
-        )
+)

@@ -22,7 +22,6 @@ repositories {
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-mongodb")
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.cloud:spring-cloud-starter-aws:$springCloudVersion")
     implementation("org.springframework.cloud:spring-cloud-starter-aws-messaging:$springCloudVersion")
     implementation("org.springframework.statemachine:spring-statemachine-core:$stateMachineVersion")
 
